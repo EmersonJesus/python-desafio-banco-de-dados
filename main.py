@@ -4,7 +4,6 @@ import textwrap
 from bd import criar_bd, criar_conexao
 from servico import ClienteServico
 
-
 def menu():
     menu = """\n
     ================ MENU ================
@@ -14,29 +13,42 @@ def menu():
     => """
     return input(textwrap.dedent(menu))
 
-
 def main():
-    conexao = criar_conexao()
-    cursor = conexao.cursor()
-    cursor.row_factory = sqlite3.Row
+    try:
+        conexao = criar_conexao()
+        cursor = conexao.cursor()
+        cursor.row_factory = sqlite3.Row
 
-    criar_bd(cursor=cursor)
+        criar_bd(cursor=cursor)
 
-    servico = ClienteServico(cursor=cursor)
+        servico = ClienteServico(cursor=cursor)
 
-    while True:
-        match menu():
-            case "1":
-                servico.criar_cliente()
-                conexao.commit()
-            case "2":
-                servico.listar_clientes()
-            case "0":
+        while True:
+            opcao = menu()
+            if opcao == "1":
+                try:
+                    servico.criar_cliente()
+                    conexao.commit()
+                    print("\n=== Cliente criado com sucesso! ===")
+                except Exception as e:
+                    conexao.rollback()
+                    print(f"\n@@@ Erro ao criar cliente: {e} @@@")
+            elif opcao == "2":
+                try:
+                    servico.listar_clientes()
+                except Exception as e:
+                    print(f"\n@@@ Erro ao listar clientes: {e} @@@")
+            elif opcao == "0":
+                print("\n=== Saindo... ===")
                 break
-            case _:
+            else:
                 print("\n@@@ Operação inválida, por favor selecione novamente a operação desejada. @@@")
 
-    conexao.close()
+    except sqlite3.Error as e:
+        print(f"\n@@@ Erro na conexão com o banco de dados: {e} @@@")
+    finally:
+        if conexao:
+            conexao.close()
 
-
-main()
+if __name__ == "__main__":
+    main()
