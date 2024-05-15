@@ -104,5 +104,3 @@ class ClienteServico:
             cliente = PessoaJuridica.converter_objeto_bd(objeto_db=dados_cliente)
         return str(cliente)
     
-    def excluir_cliente_por_id(self, cliente_id: int) -> None:
-        self.cursor.execute("DELETE FROM cliente WHERE id = ?;", (cliente_id,))
