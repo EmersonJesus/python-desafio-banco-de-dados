@@ -75,20 +75,31 @@ class ClienteServico:
 
         print("\n=== Cliente criado com sucesso! ===")
 
-    def listar_clientes(self) -> None:
-        self.cursor.execute("SELECT * FROM pessoa_fisica pf INNER JOIN cliente c ON c.id = pf.cliente_id;")
-        clientes = self.cursor.fetchall()
-        self.cursor.execute("SELECT * FROM pessoa_juridica pj INNER JOIN cliente c ON c.id = pj.cliente_id;")
-        clientes += self.cursor.fetchall()
+def listar_clientes(self) -> None:
+    self.cursor.execute("SELECT * FROM pessoa_fisica pf INNER JOIN cliente c ON c.id = pf.cliente_id;")
+    clientes_pf = self.cursor.fetchall()
+    self.cursor.execute("SELECT * FROM pessoa_juridica pj INNER JOIN cliente c ON c.id = pj.cliente_id;")
+    clientes_pj = self.cursor.fetchall()
 
-        if not clientes:
-            print("\n@@@ Não existem clientes cadastrados! @@@")
-            return
+    if not clientes_pf and not clientes_pj:
+        print("\n@@@ Não existem clientes cadastrados! @@@")
+        return
 
-        for cliente in clientes:
+    if clientes_pf:
+        print("\n=== Lista de Clientes com CPF ===\n")
+        for cliente in clientes_pf:
             print(self._apresentar_dados(dados_cliente=dict(cliente)))
+            print()  
 
-    def _apresentar_dados(self, dados_cliente: dict[str, str | int]) -> str:
-        if "cpf" in dados_cliente:
-            return PessoaFisica.converter_objeto_bd(objeto_db=dados_cliente)
-        return PessoaJuridica.converter_objeto_bd(objeto_db=dados_cliente)
+    if clientes_pj:
+        print("\n=== Lista de Clientes com CNPJ ===\n")
+        for cliente in clientes_pj:
+            print(self._apresentar_dados(dados_cliente=dict(cliente)))
+            print()  
+
+def _apresentar_dados(self, dados_cliente: dict[str, str | int]) -> str:
+    if "cpf" in dados_cliente:
+        cliente = PessoaFisica.converter_objeto_bd(objeto_db=dados_cliente)
+    else:
+        cliente = PessoaJuridica.converter_objeto_bd(objeto_db=dados_cliente)
+    return str(cliente)
