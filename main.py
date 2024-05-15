@@ -9,6 +9,7 @@ def menu():
     ================ MENU ================
     [1]\tNovo cliente
     [2]\tListar clientes
+    [3]\tExcluir cliente por ID
     [0]\tSair
     => """
     return input(textwrap.dedent(menu))
@@ -38,6 +39,15 @@ def main():
                     servico.listar_clientes()
                 except Exception as e:
                     print(f"\n@@@ Erro ao listar clientes: {e} @@@")
+            elif opcao == "3":
+                try:
+                    cliente_id = int(input("Informe o ID do cliente a ser excluído: "))
+                    servico.excluir_cliente_por_id(cliente_id)
+                    conexao.commit()
+                    print("\n=== Cliente excluído com sucesso! ===")
+                except ValueError:
+                    conexao.rollback()
+                    print("\n@@@ ID do cliente deve ser um número inteiro! @@@")
             elif opcao == "0":
                 print("\n=== Saindo... ===")
                 break
