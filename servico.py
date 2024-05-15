@@ -1,7 +1,5 @@
 from sqlite3 import Cursor
-
 from dominio import Cliente, PessoaFisica, PessoaJuridica
-
 
 class ClienteServico:
     def __init__(self, cursor: Cursor) -> None:
@@ -10,25 +8,27 @@ class ClienteServico:
     def filtrar_cliente(self, documento: str) -> int:
         if len(documento) == 11:
             self.cursor.execute("SELECT COUNT(*) AS total FROM pessoa_fisica WHERE cpf=?;", (documento,))
-        else:
+        elif len(documento) == 14:
             self.cursor.execute("SELECT COUNT(*) AS total FROM pessoa_juridica WHERE cnpj=?;", (documento,))
+        else:
+            raise ValueError("Documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ).")
         return self.cursor.fetchone()["total"]
 
     def _criar_cliente_pessoa_fisica(self, documento: str) -> PessoaFisica:
-        nome = input("Informe o nome completo: ")
-        renda_mensal = float(input("Informe sua renda mensal: "))
-        email = input("Informe seu email: ")
-        telefone = input("Informe seu telefone: ")
+        nome = input("Informe o nome completo: ").strip()
+        renda_mensal = float(input("Informe sua renda mensal: ").strip())
+        email = input("Informe seu email: ").strip()
+        telefone = input("Informe seu telefone: ").strip()
 
         return PessoaFisica(
             nome=nome, cpf=documento, renda_mensal=renda_mensal, email=email, telefone=telefone, status="ativo"
         )
 
     def _criar_cliente_pessoa_juridica(self, documento: str) -> PessoaJuridica:
-        nome = input("Informe o nome fantasia: ")
-        faturamento_anual = float(input("Informe seu faturamento anual: "))
-        email = input("Informe seu email: ")
-        telefone = input("Informe seu telefone: ")
+        nome = input("Informe o nome fantasia: ").strip()
+        faturamento_anual = float(input("Informe seu faturamento anual: ").strip())
+        email = input("Informe seu email: ").strip()
+        telefone = input("Informe seu telefone: ").strip()
 
         return PessoaJuridica(
             nome_fantasia=nome,
@@ -47,8 +47,12 @@ class ClienteServico:
         return self.cursor.lastrowid
 
     def criar_cliente(self) -> None:
-        documento = input("Informe o documento (CPF/CNPJ): ")
-        existe_cliente = self.filtrar_cliente(documento)
+        documento = input("Informe o documento (CPF/CNPJ): ").strip()
+        try:
+            existe_cliente = self.filtrar_cliente(documento)
+        except ValueError as e:
+            print(f"\n@@@ {e} @@@")
+            return
 
         if existe_cliente:
             print("\n@@@ Já existe cliente com esse documento (CPF/CNPJ)! @@@")
@@ -61,7 +65,7 @@ class ClienteServico:
                 "INSERT INTO pessoa_fisica (cliente_id, nome, cpf, renda_mensal) VALUES (?,?,?,?)",
                 (cliente_id, cliente.nome, cliente.cpf, cliente.renda_mensal),
             )
-        else:
+        elif len(documento) == 14:
             cliente = self._criar_cliente_pessoa_juridica(documento=documento)
             cliente_id = self._criar_cliente(cliente=cliente)
             self.cursor.execute(
@@ -79,6 +83,7 @@ class ClienteServico:
 
         if not clientes:
             print("\n@@@ Não existem clientes cadastrados! @@@")
+            return
 
         for cliente in clientes:
             print(self._apresentar_dados(dados_cliente=dict(cliente)))
