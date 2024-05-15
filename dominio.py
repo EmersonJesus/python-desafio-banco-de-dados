@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import Self
-
+from typing import Self, Dict, Any
 
 @dataclass
 class Cliente:
@@ -23,7 +22,7 @@ class PessoaFisica(Cliente):
     renda_mensal: float
 
     @classmethod
-    def converter_objeto_bd(cls, objeto_db: dict) -> Self:
+    def converter_objeto_bd(cls, objeto_db: Dict[str, Any]) -> Self:
         return cls(
             email=objeto_db["email"],
             telefone=objeto_db["telefone"],
@@ -33,6 +32,9 @@ class PessoaFisica(Cliente):
             renda_mensal=objeto_db["renda_mensal"],
         )
 
+    def __str__(self) -> str:
+        return super().__str__() + f"Nome: {self.nome}\nCPF: {self.cpf}\nRenda mensal: {self.renda_mensal}\n"
+
 
 @dataclass
 class PessoaJuridica(Cliente):
@@ -41,7 +43,7 @@ class PessoaJuridica(Cliente):
     faturamento_anual: float
 
     @classmethod
-    def converter_objeto_bd(cls, objeto_db: dict) -> Self:
+    def converter_objeto_bd(cls, objeto_db: Dict[str, Any]) -> Self:
         return cls(
             email=objeto_db["email"],
             telefone=objeto_db["telefone"],
@@ -50,3 +52,6 @@ class PessoaJuridica(Cliente):
             cnpj=objeto_db["cnpj"],
             faturamento_anual=objeto_db["faturamento_anual"],
         )
+
+    def __str__(self) -> str:
+        return super().__str__() + f"Nome fantasia: {self.nome_fantasia}\nCNPJ: {self.cnpj}\nFaturamento anual: {self.faturamento_anual}\n"
